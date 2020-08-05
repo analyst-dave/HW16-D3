@@ -69,7 +69,6 @@ d3.csv("assets/data/data.csv").then(function(healthData) {
     .attr("cy", d => yLinearScale(d.healthcare))
     .attr("r", "15")
     .attr("fill", "coral")
-    //.attr("stroke","black")
     .attr("opacity", ".5");
 
     // TODO:  ==> Fix text! <==
@@ -77,12 +76,7 @@ d3.csv("assets/data/data.csv").then(function(healthData) {
     .data(healthData)
     .enter()
     .append("text")
-    //.attr("text-anchor", "start")
-    //.attr("font-size", "5")
-    //.attr("dx", d => xLinearScale(d.hair_length))
-    //.attr("dy", d => yLinearScale(d.num_hits))
-    //.attr("cx", d => xLinearScale(d.poverty))
-    //.attr("cy", d => yLinearScale(d.healthcare))
+    .attr("text-anchor", "middle")
     .attr("x", d => xLinearScale(d.poverty))
     .attr("y", d => yLinearScale(d.healthcare))
     //.offset([40, -20])
