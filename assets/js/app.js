@@ -73,17 +73,20 @@ d3.csv("assets/data/data.csv").then(function(healthData) {
     .attr("opacity", ".5");
 
     // TODO:  ==> Fix text! <==
-    circlesGroup.append("text")
-        //.attr("text-anchor", "start")
-        //.attr("font-size", "5")
-        //.attr("dx", d => xLinearScale(d.hair_length))
-        //.attr("dy", d => yLinearScale(d.num_hits))
-        //.attr("cx", d => xLinearScale(d.poverty))
-        //.attr("cy", d => yLinearScale(d.healthcare))
-        .attr("x", d => xLinearScale(d.poverty))
-        .attr("y", d => yLinearScale(d.healthcare))
-        //.attr("z-index", 999)
-        .text(function(d){return d.abbr});
+    var textGroup = chartGroup.selectAll("text")
+    .data(healthData)
+    .enter()
+    .append("text")
+    //.attr("text-anchor", "start")
+    //.attr("font-size", "5")
+    //.attr("dx", d => xLinearScale(d.hair_length))
+    //.attr("dy", d => yLinearScale(d.num_hits))
+    //.attr("cx", d => xLinearScale(d.poverty))
+    //.attr("cy", d => yLinearScale(d.healthcare))
+    .attr("x", d => xLinearScale(d.poverty))
+    .attr("y", d => yLinearScale(d.healthcare))
+    //.offset([40, -20])
+    .text(function(d){return d.abbr});
 
     // Step 6: Initialize tool tip
     // ==============================
