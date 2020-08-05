@@ -79,6 +79,8 @@ d3.csv("assets/data/data.csv").then(function(healthData) {
     .attr("text-anchor", "middle")
     .attr("x", d => xLinearScale(d.poverty))
     .attr("y", d => yLinearScale(d.healthcare))
+    .attr("font-size", "15px")
+    .attr("fill", "white")
     //.offset([40, -20])
     .text(function(d){return d.abbr});
 
