@@ -1,11 +1,11 @@
-// @TODO: YOUR CODE HERE!
+
 var svgWidth = 1000;
-var svgHeight = 500;
+var svgHeight = 600;
 
 var margin = {
   top: 20,
   right: 40,
-  bottom: 60,
+  bottom: 100,
   left: 100
 };
 
@@ -21,16 +21,357 @@ var svg = d3.select(".chart")
 var chartGroup = svg.append("g")
   .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
+var files = ["assets/data/data.csv"];
+
+Promise.all(files.map(url => d3.csv(url))).then(drawChart);
+
+// -------------------------------------------------------------
+
+function drawChart(cvsData) {
+  //console.log(error);
+  //onsole.log(topojsonData);
+  console.log(cvsData);
+  cvsData = cvsData[0];
+  console.log(cvsData);
+    // Step 1: Parse Data/Cast as numbers
+    // ==============================
+    cvsData.forEach( data => {
+      data.poverty = +data.poverty;
+      data.healthcare = +data.healthcare;
+    });
+
+  var curX = "poverty";
+  var curY = "obesity";
+  var xMin;
+  var xMax;
+  var yMin;
+  var yMax;
+
+  // a. change the min and max for x
+  function xMinMax() {
+    // min will grab the smallest datum from the selected column.
+    xMin = d3.min(cvsData, function(d) {
+      return parseFloat(d[curX]) * 0.90;
+    });
+
+    // .max will grab the largest datum from the selected column.
+    xMax = d3.max(cvsData, function(d) {
+      return parseFloat(d[curX]) * 1.10;
+    });
+  }
+
+  // b. change the min and max for y
+  function yMinMax() {
+    // min will grab the smallest datum from the selected column.
+    yMin = d3.min(cvsData, function(d) {
+      return parseFloat(d[curY]) * 0.90;
+    });
+
+    // .max will grab the largest datum from the selected column.
+    yMax = d3.max(cvsData, function(d) {
+      return parseFloat(d[curY]) * 1.10;
+    });
+  }
+
+  // c. change the classes (and appearance) of label text when clicked.
+  function labelChange(axis, clickedText) {
+    // Switch the currently active to inactive.
+    d3
+      .selectAll(".axisText")
+      .filter("." + axis)
+      .filter(".active")
+      .classed("active", false)
+      .classed("inactive", true);
+
+    // Switch the text just clicked to active.
+    clickedText.classed("inactive", false).classed("active", true);
+  }
+
+  xMinMax();
+  yMinMax();
+
+    // Step 2: Create scale functions
+    // ==============================
+    var xLinearScale = d3.scaleLinear()
+      //.domain([8, d3.max(cvsData, d => d.poverty)+1])
+      //.range([0, width]);
+      .domain([xMin, xMax])
+      .range([0, width]);
+
+    var yLinearScale = d3.scaleLinear()
+      //.domain([2, d3.max(cvsData, d => d.healthcare)+1])
+      //.range([height, 0]);
+      .domain([yMin, yMax])
+      // Height is inverses due to how d3 calc's y-axis placement
+      .range([height, 0]);
+
+    // Step 3: Create axis functions
+    // ==============================
+    var bottomAxis = d3.axisBottom(xLinearScale);
+    var leftAxis = d3.axisLeft(yLinearScale);
+
+    // Step 4: Append Axes to the chart
+    // ==============================
+    chartGroup.append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(bottomAxis)
+    .attr("class", "xAxis");
+
+    chartGroup.append("g")
+    .call(leftAxis)
+    .attr("class", "yAxis");
+
+    // Step 5: Create Circles
+    // ==============================
+    var circlesGroup = chartGroup.selectAll("circle")
+    .data(cvsData)
+    .enter();
+
+    circlesGroup.append("circle")
+    //.attr("cx", d => xLinearScale(d.poverty))
+    .attr("cx", d => xLinearScale(d[curX]))
+    .attr("cy", d => yLinearScale(d[curY])-5)
+    //.attr("cy", d => yLinearScale(d.healthcare)-5)
+    .attr("r", "14")
+    .attr("fill", "coral")
+    .attr("opacity", ".5")
+    .on("mouseover", data => {
+      toolTip.show(data, this);
+    }).on("mouseout", data => {
+        toolTip.hide(data);
+    });
+
+    // Step 6: Create the text group
+    // ==============================
+    //var textGroup = chartGroup.selectAll("text")
+    //.data(healthData)
+    //.enter()
+    circlesGroup.append("text")
+    .attr("text-anchor", "middle")
+    //.attr("x", d => xLinearScale(d.poverty))
+    .attr("x", d => xLinearScale(d[curX]))
+    .attr("y", d => yLinearScale(d[curY]))
+    //.attr("y", d => yLinearScale(d.healthcare))
+    //.style("font-size", "15px")
+    .attr("fill", "grey")
+    .text(d => d.abbr)
+    .on("mouseover", data => {
+      toolTip.show(data, this);
+    }).on("mouseout", data => {
+        toolTip.hide(data);
+    });
+
+    // Step 7: Initialize tool tip
+    // ==============================
+    var toolTip = d3.tip()
+      .attr("class", "tooltip")
+      //.offset([80, -60])
+      .offset([45, -83])
+      .html( d => {
+        return (`<b>${d.state}</b> (${d.abbr})<br>Poverty: ${d.poverty}%<br>HealthCare: ${d.healthcare}%`);
+      });
+
+    // Step 8: Create tooltip in the chart
+    // ==============================
+    chartGroup.call(toolTip);
+
+    // Step 9: Create event listeners to display and hide the tooltip
+    // ==============================
+    //circlesGroup
+
+    // Create Y labels
+    /*
+    chartGroup.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin.left + 40)
+      .attr("x", 0 - (height / 2))
+      .attr("dy", "1em")
+      .attr("class", "axisText")
+      .text("Lacks Healthcare (%)");
+    */
+
+    // 1. Obesity
+    chartGroup
+   .append("text")
+   .attr("transform", "rotate(-90)")
+   .attr("y", 0 - margin.left + 60)
+   .attr("x", 0 - (height / 2))
+   .attr("data-name", "obesity")
+   .attr("data-axis", "y")
+   .attr("class", "axisText")
+   .text("Obese (%)");
+ 
+ // 2. Smokes
+ chartGroup
+   .append("text")
+   .attr("transform", "rotate(-90)")
+   .attr("x", 0 - (height / 2))
+   .attr("y", 0 - margin.left + 40)
+   .attr("data-name", "smokes")
+   .attr("data-axis", "y")
+   .attr("class", "axisText")
+   .text("Smokes (%)");
+ 
+ // 3. Lacks Healthcare
+ chartGroup
+   .append("text")
+   .attr("transform", "rotate(-90)")
+   .attr("y", 0 - margin.left + 20)
+   .attr("x", 0 - (height / 2))
+   .attr("data-name", "healthcare")
+   .attr("data-axis", "y")
+   .attr("class", "axisText")
+   .text("Lacks Healthcare (%)");
+
+    // Create X labels
+    /*
+    chartGroup.append("text")
+      .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
+      .attr("class", "axisText")
+      .text("In Poverty (%)");
+    */
+    // 1. Poverty
+    chartGroup
+    .append("text")
+    .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
+    .attr("y", -20)
+    .attr("data-name", "poverty")
+    .attr("data-axis", "x")
+    .attr("class", "axisText")
+    .text("In Poverty (%)");
+    // 2. Age
+    chartGroup
+    .append("text")
+    .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
+    .attr("y", 0)
+    .attr("data-name", "age")
+    .attr("data-axis", "x")
+    .attr("class", "axisText")
+    .text("Age (Median)");
+    // 3. Income
+    chartGroup
+    .append("text")
+    .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
+    .attr("y", 20)
+    .attr("data-name", "income")
+    .attr("data-axis", "x")
+    .attr("class", "axisText")
+    .text("Household Income (Median)");
+    
+     // Select all axis text and add this d3 click event.
+  d3.selectAll(".axisText").on("click", function() {
+    alert('clicked');
+    // Make sure we save a selection of the clicked text,
+    // so we can reference it without typing out the invoker each time.
+    var self = d3.select(this);
+
+    // We only want to run this on inactive labels.
+    // It's a waste of the processor to execute the function
+    // if the data is already displayed on the graph.
+    if (!self.classed("inactive")) {
+      // Grab the name and axis saved in label.
+      var axis = self.attr("data-axis");
+      var name = self.attr("data-name");
+
+      // When x is the saved axis, execute this:
+      if (axis === "x") {
+        // Make curX the same as the data name.
+        curX = name;
+
+        // Change the min and max of the x-axis
+        xMinMax();
+
+        // Update the domain of x.
+        xLinearScale.domain([xMin, xMax]);
+
+        // Now use a transition when we update the xAxis.
+        svg.select(".xAxis").transition().duration(300).call(bottomAxis);
+
+        // With the axis changed, let's update the location of the state circles.
+        d3.selectAll("circle").each(function() {
+          // Each state circle gets a transition for it's new attribute.
+          // This will lend the circle a motion tween
+          // from it's original spot to the new location.
+          d3
+            .select(this)
+            .transition()
+            .attr("cx", function(d) {
+              return xLinearScale(d[curX]);
+            })
+            .duration(300);
+        });
+
+        // We need change the location of the state texts, too.
+        d3.selectAll(".stateText").each(function() {
+          // We give each state text the same motion tween as the matching circle.
+          d3
+            .select(this)
+            .transition()
+            .attr("dx", function(d) {
+              return xLinearScale(d[curX]);
+            })
+            .duration(300);
+        });
+
+        // Finally, change the classes of the last active label and the clicked label.
+        labelChange(axis, self);
+      }
+      else {
+        // When y is the saved axis, execute this:
+        // Make curY the same as the data name.
+        curY = name;
+
+        // Change the min and max of the y-axis.
+        yMinMax();
+
+        // Update the domain of y.
+        yLinearScale.domain([yMin, yMax]);
+
+        // Update Y Axis
+        svg.select(".yAxis").transition().duration(300).call(leftAxis);
+
+        // With the axis changed, let's update the location of the state circles.
+        d3.selectAll("circle").each(function() {
+          // Each state circle gets a transition for it's new attribute.
+          // This will lend the circle a motion tween
+          // from it's original spot to the new location.
+          d3
+            .select(this)
+            .transition()
+            .attr("cy", function(d) {
+              return yLinearScale(d[curY]);
+            })
+            .duration(300);
+        });
+
+        // We need change the location of the state texts, too.
+        d3.selectAll(".stateText").each(function() {
+          // We give each state text the same motion tween as the matching circle.
+          d3
+            .select(this)
+            .transition()
+            .attr("dy", function(d) {
+              return yLinearScale(d[curY]) + circRadius / 3;
+            })
+            .duration(300);
+        });
+
+        // Finally, change the classes of the last active label and the clicked label.
+        labelChange(axis, self);
+      }
+    }
+  });
+
+  }
+/*
 // Import Data
-d3.csv("assets/data/data.csv").then(function(healthData) {
+d3.csv("assets/data/data.csv").then( healthData => {
 
   console.log(healthData);
 
     // Step 1: Parse Data/Cast as numbers
     // ==============================
-    healthData.forEach(function(data) {
-      //data.hair_length = +data.hair_length;
-      //data.num_hits = +data.num_hits;
+    healthData.forEach( data => {
       data.poverty = +data.poverty;
       data.healthcare = +data.healthcare;
     });
@@ -63,52 +404,57 @@ d3.csv("assets/data/data.csv").then(function(healthData) {
     // ==============================
     var circlesGroup = chartGroup.selectAll("circle")
     .data(healthData)
-    .enter()
-    .append("circle")
+    .enter();
+
+    circlesGroup.append("circle")
     .attr("cx", d => xLinearScale(d.poverty))
-    .attr("cy", d => yLinearScale(d.healthcare))
+    .attr("cy", d => yLinearScale(d.healthcare)-5)
     .attr("r", "15")
     .attr("fill", "coral")
-    .attr("opacity", ".5");
+    .attr("opacity", ".5")
+    .on("mouseover", data => {
+      toolTip.show(data, this);
+    }).on("mouseout", data => {
+        toolTip.hide(data);
+    });
 
-    // TODO:  ==> Fix text! <==
-    var textGroup = chartGroup.selectAll("text")
-    .data(healthData)
-    .enter()
-    .append("text")
+    // Step 6: Create the text group
+    // ==============================
+    //var textGroup = chartGroup.selectAll("text")
+    //.data(healthData)
+    //.enter()
+    circlesGroup.append("text")
     .attr("text-anchor", "middle")
     .attr("x", d => xLinearScale(d.poverty))
     .attr("y", d => yLinearScale(d.healthcare))
-    .attr("font-size", "15px")
-    .attr("fill", "white")
-    //.offset([40, -20])
-    .text(function(d){return d.abbr});
+    //.style("font-size", "15px")
+    .attr("fill", "grey")
+    .text(d => d.abbr)
+    .on("mouseover", data => {
+      toolTip.show(data, this);
+    }).on("mouseout", data => {
+        toolTip.hide(data);
+    });
 
-    // Step 6: Initialize tool tip
+    // Step 7: Initialize tool tip
     // ==============================
     var toolTip = d3.tip()
       .attr("class", "tooltip")
       //.offset([80, -60])
-      .offset([45, -85])
-      .html(function(d) {
+      .offset([45, -83])
+      .html( d => {
         return (`<b>${d.state}</b> (${d.abbr})<br>Poverty: ${d.poverty}%<br>HealthCare: ${d.healthcare}%`);
       });
 
-    // Step 7: Create tooltip in the chart
+    // Step 8: Create tooltip in the chart
     // ==============================
     chartGroup.call(toolTip);
 
-    // Step 8: Create event listeners to display and hide the tooltip
+    // Step 9: Create event listeners to display and hide the tooltip
     // ==============================
-    circlesGroup.on("click", function(data) {
-      toolTip.show(data, this);
-    })
-      // onmouseout event
-      .on("mouseout", function(data, index) {
-        toolTip.hide(data);
-      });
+    //circlesGroup
 
-    // Create axes labels
+    // Create Y labels
     chartGroup.append("text")
       .attr("transform", "rotate(-90)")
       .attr("y", 0 - margin.left + 40)
@@ -117,10 +463,12 @@ d3.csv("assets/data/data.csv").then(function(healthData) {
       .attr("class", "axisText")
       .text("Lacks Healthcare (%)");
 
+    // Create X labels
     chartGroup.append("text")
       .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
       .attr("class", "axisText")
       .text("In Poverty (%)");
-  }).catch(function(error) {
+}).catch( error => {
     console.log(error);
-  });
+});
+*/
