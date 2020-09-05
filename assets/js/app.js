@@ -133,8 +133,8 @@ function drawChart(cvsData) {
     .attr("cy", d => yLinearScale(d[curY])-5)
     //.attr("cy", d => yLinearScale(d.healthcare)-5)
     .attr("r", "14")
-    .attr("fill", "green")
-    .attr("opacity", ".4")
+    .style("fill", "green")
+    .style("opacity", ".4")
     .on("mouseover", data => {
       toolTip.show(data, this);
       // append the x line    
@@ -157,9 +157,13 @@ function drawChart(cvsData) {
       .attr("x2", xLinearScale(data[curX])+100)
       .attr("y1", yLinearScale(data[curY])+20)
       .attr("y2", yLinearScale(data[curY])+20);
+      // Highlight the state circle's border
+      //d3.select(this).style("stroke", "#323232");
     }).on("mouseout", data => {
         toolTip.hide(data);
         focus.selectAll("line").remove();
+        // Remove highlight
+        //d3.select(this).style("stroke", "#e3e3e3");
     });
 
     // Step 6: Create the text group
