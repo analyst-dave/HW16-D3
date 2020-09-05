@@ -6,7 +6,7 @@
 
 .active {
   font-weight: bold;
-  fill: coral;
+  fill: green;
   transition: fill 0.3s ease-out;
   text-anchor: middle;
 }
@@ -48,15 +48,13 @@
   font-size: 12px;
   line-height: 1;
   line-height: 1.5em;
-  color: #fff;
+  color: white;
   text-align: center;
   background: slategrey;
-  background-image: linear-gradient(
-          to right,
-          slategrey,
-          #f57546
-        );
-  opacity: 0.6;
+  background-image: url("../cool-background.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  opacity: 1;
   border-radius: 20px;
 }
 
