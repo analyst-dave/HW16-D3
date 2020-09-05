@@ -169,9 +169,9 @@ function drawChart(cvsData) {
     var toolTip = d3.tip()
       .attr("class", "tooltip")
       //.offset([80, -60])
-      .offset([45, -83])
+      .offset([40, -140])
       .html( d => {
-        return (`<b>${d.state}</b> (${d.abbr})<br>Poverty: ${d.poverty}%<br>HealthCare: ${d.healthcare}%`);
+        return (`<u><b>${d.state}</b> (${d.abbr})</u><br>Obesity: ${d.obesity}%  Poverty: ${d.poverty}%<br>Smoke: ${d.smokes}%  Median Age: ${d.age}<br>HealthCare: ${d.healthcare}%  Median Income: $${d.income}`);
       });
 
     // Step 8: Create tooltip in the chart
@@ -180,24 +180,13 @@ function drawChart(cvsData) {
 
     // Step 9: Create event listeners to display and hide the tooltip
     // ==============================
-    //circlesGroup
 
     // Create Y labels
-    /*
-    chartGroup.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 0 - margin.left + 40)
-      .attr("x", 0 - (height / 2))
-      .attr("dy", "1em")
-      .attr("class", "axisText")
-      .text("Lacks Healthcare (%)");
-    */
-
     // 1. Obesity
     chartGroup
    .append("text")
    .attr("transform", "rotate(-90)")
-   .attr("y", 0 - margin.left + 60)
+   .attr("y", 0 - margin.left + 70)
    .attr("x", 0 - (height / 2))
    .attr("data-name", "obesity")
    .attr("data-axis", "y")
@@ -219,7 +208,7 @@ function drawChart(cvsData) {
  chartGroup
    .append("text")
    .attr("transform", "rotate(-90)")
-   .attr("y", 0 - margin.left + 20)
+   .attr("y", 0 - margin.left + 10)
    .attr("x", 0 - (height / 2))
    .attr("data-name", "healthcare")
    .attr("data-axis", "y")
@@ -227,17 +216,11 @@ function drawChart(cvsData) {
    .text("Lacks Healthcare (%)");
 
     // Create X labels
-    /*
-    chartGroup.append("text")
-      .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
-      .attr("class", "axisText")
-      .text("In Poverty (%)");
-    */
     // 1. Poverty
     chartGroup
     .append("text")
     .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
-    .attr("y", -20)
+    .attr("y", -10)
     .attr("data-name", "poverty")
     .attr("data-axis", "x")
     .attr("class", "axisText active x")
@@ -246,7 +229,7 @@ function drawChart(cvsData) {
     chartGroup
     .append("text")
     .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
-    .attr("y", 0)
+    .attr("y", 20)
     .attr("data-name", "age")
     .attr("data-axis", "x")
     .attr("class", "axisText inactive x")
@@ -255,7 +238,7 @@ function drawChart(cvsData) {
     chartGroup
     .append("text")
     .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
-    .attr("y", 20)
+    .attr("y", 50)
     .attr("data-name", "income")
     .attr("data-axis", "x")
     .attr("class", "axisText inactive x")
