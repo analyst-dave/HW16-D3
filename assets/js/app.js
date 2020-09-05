@@ -2,7 +2,7 @@
 var svgWidth = 1000;
 var svgHeight = 600;
 var transitionTime = 1000; // 300
-var transitionStyle = "linear"; // "linear"
+var transitionStyle = d3.easeBounce; // d3.easeLinear
 
 var margin = {
   top: 20,
@@ -15,16 +15,14 @@ var width = svgWidth - margin.left - margin.right;
 var height = svgHeight - margin.top - margin.bottom;
 
 // Create an SVG wrapper, append an SVG group that will hold our chart, and shift the latter by left and top margins.
-var svg = d3.select(".chart")
-  .append("svg")
-  .attr("width", svgWidth)
-  .attr("height", svgHeight);
+var svg = d3.select(".chart").append("svg").attr("width", svgWidth).attr("height", svgHeight);
 
-var chartGroup = svg.append("g")
-  .attr("transform", `translate(${margin.left}, ${margin.top})`);
+var chartGroup = svg.append("g").attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+var focus = svg.append("g");
 
 var files = ["assets/data/data.csv"];
-
+// possibility for multi d3.csv()/d3.json() imports, wait for all to finish then function drawChart
 Promise.all(files.map(url => d3.csv(url))).then(drawChart);
 
 // -------------------------------------------------------------
@@ -135,12 +133,33 @@ function drawChart(cvsData) {
     .attr("cy", d => yLinearScale(d[curY])-5)
     //.attr("cy", d => yLinearScale(d.healthcare)-5)
     .attr("r", "14")
-    .attr("fill", "coral")
-    .attr("opacity", ".5")
+    .attr("fill", "green")
+    .attr("opacity", ".4")
     .on("mouseover", data => {
       toolTip.show(data, this);
+      // append the x line    
+      focus.append("line")
+      .attr("class", "x")
+      .style("stroke", "green")
+      .style("stroke-dasharray", "3,3")
+      .style("opacity", 0.5)
+      .attr("x1", xLinearScale(data[curX])+100)
+      .attr("x2", xLinearScale(data[curX])+100)
+      .attr("y1", yLinearScale(data[curY])+20)
+      .attr("y2", height+20);
+      // append the y line     
+      focus.append("line")
+      .attr("class", "y")
+      .style("stroke", "green")
+      .style("stroke-dasharray", "3,3")
+      .style("opacity", 0.5)
+      .attr("x1", 100)
+      .attr("x2", xLinearScale(data[curX])+100)
+      .attr("y1", yLinearScale(data[curY])+20)
+      .attr("y2", yLinearScale(data[curY])+20);
     }).on("mouseout", data => {
         toolTip.hide(data);
+        focus.selectAll("line").remove();
     });
 
     // Step 6: Create the text group
@@ -160,8 +179,29 @@ function drawChart(cvsData) {
     .text(d => d.abbr)
     .on("mouseover", data => {
       toolTip.show(data, this);
+      // append the x line    
+      focus.append("line")
+      .attr("class", "x")
+      .style("stroke", "green")
+      .style("stroke-dasharray", "3,3")
+      .style("opacity", 0.5)
+      .attr("x1", xLinearScale(data[curX])+100)
+      .attr("x2", xLinearScale(data[curX])+100)
+      .attr("y1", yLinearScale(data[curY])+20)
+      .attr("y2", height+20);
+      // append the y line     
+      focus.append("line")
+      .attr("class", "y")
+      .style("stroke", "green")
+      .style("stroke-dasharray", "3,3")
+      .style("opacity", 0.5)
+      .attr("x1", 100)
+      .attr("x2", xLinearScale(data[curX])+100)
+      .attr("y1", yLinearScale(data[curY])+20)
+      .attr("y2", yLinearScale(data[curY])+20);
     }).on("mouseout", data => {
         toolTip.hide(data);
+        focus.selectAll("line").remove();
     });
 
     // Step 7: Initialize tool tip
@@ -169,7 +209,7 @@ function drawChart(cvsData) {
     var toolTip = d3.tip()
       .attr("class", "tooltip")
       //.offset([80, -60])
-      .offset([40, -140])
+      .offset([-5, 0])
       .html( d => {
         return (`<u><b>${d.state}</b> (${d.abbr})</u><br>Obesity: ${d.obesity}%  Poverty: ${d.poverty}%<br>Smoke: ${d.smokes}%  Median Age: ${d.age}<br>HealthCare: ${d.healthcare}%  Median Income: $${d.income}`);
       });
@@ -326,7 +366,7 @@ function drawChart(cvsData) {
           d3
             .select(this)
             .transition()
-            .ease(d3.easeBounce)
+            .ease(transitionStyle)
             .attr("cy", function(d) {
               return yLinearScale(d[curY])-5;
             })
@@ -339,7 +379,7 @@ function drawChart(cvsData) {
           d3
             .select(this)
             .transition()
-            .ease(d3.easeBounce)
+            .ease(transitionStyle)
             .attr("dy", function(d) {
               return yLinearScale(d[curY]);
             })
