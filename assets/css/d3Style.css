@@ -40,16 +40,24 @@
   margin: 0;
 }
 
-.d3-tip {
+.header {
+  margin-top: 2px;
+  margin-left: 100px;
   padding: 6px;
+  width: 860px;
   font-size: 12px;
   line-height: 1;
   line-height: 1.5em;
   color: #fff;
   text-align: center;
-  text-transform: capitalize;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 4px;
+  background: slategrey;
+  background-image: linear-gradient(
+          to right,
+          slategrey,
+          #f57546
+        );
+  opacity: 0.6;
+  border-radius: 20px;
 }
 
 /* Mobile Rules */

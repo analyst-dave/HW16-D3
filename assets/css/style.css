@@ -32,8 +32,8 @@ body {
 
 .tooltip {
   position: absolute;
-  width: 135px;
-  height: 60px;
+  width: 250px;
+  height: auto;
   padding: 2px;
   padding-top: 8px;
   font: 12px sans-serif;
@@ -42,7 +42,7 @@ body {
   background-image: linear-gradient(
           to left,
           #ffcfa0,
-          #f57546
+          slategrey
         );
   border: 0;
   opacity: 0.2;
